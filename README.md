@@ -45,6 +45,7 @@ cp .env.example .env
 | `GOOGLE_SHEET_RANGE` | nao | `Funcionarios!A:C` |
 | `TIMEZONE` | nao | `America/Sao_Paulo` |
 | `LOG_FORMAT` | nao | `human` |
+| `REMINDER_MODE` | nao | `both` (`today` ou `tomorrow`) |
 | `WHATSAPP_WEBHOOK_URL` | sim | - |
 | `WHATSAPP_RECIPIENT` | sim | - |
 | `WHATSAPP_SENT_BY` | nao | `birth-reminder` |
@@ -80,8 +81,9 @@ Ou compile um binario:
 go build -o birth-reminder ./cmd/birthday-reminder
 ```
 
-O arquivo `cron.example` mostra uma execucao diaria as 08:45 no fuso de Sao
-Paulo. Ajuste caminhos, horario e fuso antes de instalar no crontab.
+O arquivo `cron.example` mostra duas execucoes no fuso de Sao Paulo: aniversarios
+do dia as 08:45 e aviso do dia seguinte as 17:00. Ajuste caminhos, horarios e
+fuso antes de instalar no crontab.
 
 ## Docker
 

@@ -8,4 +8,5 @@ WHATSAPP_WEBHOOK_URL=https://your-whatsapp-provider.example/send-message
 WHATSAPP_RECIPIENT=your-recipient-id
 WHATSAPP_SENT_BY=birth-reminder
 
-45 8 * * * /opt/birth-reminder/birthday-reminder >> /var/log/birth-reminder.log 2>&1
+45 8 * * * REMINDER_MODE=today /opt/birth-reminder/birth-reminder >> /var/log/birth-reminder.log 2>&1
+0 17 * * * REMINDER_MODE=tomorrow /opt/birth-reminder/birth-reminder >> /var/log/birth-reminder.log 2>&1

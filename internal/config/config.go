@@ -10,8 +10,11 @@ import (
 )
 
 const (
-	defaultRange    = "Funcionarios!A:C"
-	defaultTimezone = "America/Sao_Paulo"
+	defaultRange      = "Funcionarios!A:C"
+	defaultTimezone   = "America/Sao_Paulo"
+	ReminderModeToday = "today"
+	ReminderModeNext  = "tomorrow"
+	ReminderModeBoth  = "both"
 )
 
 type Config struct {
@@ -21,6 +24,7 @@ type Config struct {
 	Timezone              string
 	Location              *time.Location
 	LogFormat             string
+	ReminderMode          string
 	WhatsApp              WhatsAppConfig
 }
 
@@ -56,6 +60,10 @@ func Load() (Config, error) {
 	if logFormat != "human" && logFormat != "json" {
 		return Config{}, fmt.Errorf("LOG_FORMAT deve ser human ou json")
 	}
+	reminderMode := strings.ToLower(valueOrDefault("REMINDER_MODE", ReminderModeBoth))
+	if reminderMode != ReminderModeToday && reminderMode != ReminderModeNext && reminderMode != ReminderModeBoth {
+		return Config{}, fmt.Errorf("REMINDER_MODE deve ser today, tomorrow ou both")
+	}
 
 	whatsApp, err := loadWhatsApp()
 	if err != nil {
@@ -69,6 +77,7 @@ func Load() (Config, error) {
 		Timezone:              timezone,
 		Location:              location,
 		LogFormat:             logFormat,
+		ReminderMode:          reminderMode,
 		WhatsApp:              whatsApp,
 	}, nil
 }

@@ -34,6 +34,7 @@ func run(ctx context.Context) error {
 	logger.Info("[SYNC] Iniciando verificacao de aniversarios",
 		"range", cfg.GoogleSheetRange,
 		"timezone", cfg.Timezone,
+		"mode", cfg.ReminderMode,
 	)
 
 	rows, err := googlesheets.ReadRows(ctx, cfg)
@@ -41,41 +42,47 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("ler planilha do Google: %w", err)
 	}
 
-	now := time.Now().In(cfg.Location)
-	today, err := birthday.FindOnDate(rows, now, func(row int, reason string) {
+	warn := func(row int, reason string) {
 		logger.Warn("[SYNC] Linha ignorada", "row", row, "reason", reason)
-	})
-	if err != nil {
-		return err
-	}
-	tomorrow, err := birthday.FindOnDate(rows, now.AddDate(0, 0, 1), nil)
-	if err != nil {
-		return err
 	}
 
-	if len(today.People) == 0 && len(tomorrow.People) == 0 {
-		logger.Info("[SYNC] Nenhum aniversario hoje ou amanha", "date", today.Date)
-		return nil
-	}
-
-	alerts := make([]struct {
+	type alert struct {
 		when    string
 		result  birthday.Result
 		message string
-	}, 0, 2)
-	if len(today.People) > 0 {
-		alerts = append(alerts, struct {
-			when    string
-			result  birthday.Result
-			message string
-		}{"hoje", today, whatsapp.TodayMessage(today)})
 	}
-	if len(tomorrow.People) > 0 {
-		alerts = append(alerts, struct {
-			when    string
-			result  birthday.Result
-			message string
-		}{"amanha", tomorrow, whatsapp.TomorrowMessage(tomorrow)})
+
+	now := time.Now().In(cfg.Location)
+	alerts := make([]alert, 0, 2)
+	addAlert := func(date time.Time, when string, warning birthday.WarnFunc, message func(birthday.Result) string) error {
+		result, err := birthday.FindOnDate(rows, date, warning)
+		if err != nil {
+			return err
+		}
+		if len(result.People) > 0 {
+			alerts = append(alerts, alert{when: when, result: result, message: message(result)})
+		}
+		return nil
+	}
+
+	if cfg.ReminderMode == config.ReminderModeToday || cfg.ReminderMode == config.ReminderModeBoth {
+		if err := addAlert(now, "hoje", warn, whatsapp.TodayMessage); err != nil {
+			return err
+		}
+	}
+	if cfg.ReminderMode == config.ReminderModeNext || cfg.ReminderMode == config.ReminderModeBoth {
+		var warning birthday.WarnFunc
+		if cfg.ReminderMode == config.ReminderModeNext {
+			warning = warn
+		}
+		if err := addAlert(now.AddDate(0, 0, 1), "amanha", warning, whatsapp.TomorrowMessage); err != nil {
+			return err
+		}
+	}
+
+	if len(alerts) == 0 {
+		logger.Info("[SYNC] Nenhum aniversario no periodo verificado", "date", now.Format("2006-01-02"), "mode", cfg.ReminderMode)
+		return nil
 	}
 
 	client := whatsapp.New(cfg.WhatsApp)
