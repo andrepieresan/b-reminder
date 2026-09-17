@@ -34,18 +34,12 @@ func New(cfg config.WhatsAppConfig) *Client {
 func TodayMessage(result birthday.Result) string {
 	names := make([]string, 0, len(result.People))
 	for _, person := range result.People {
-		names = append(names, "🎂 *"+person.Name+"*")
-	}
-
-	date := result.Date
-	if parsed, err := time.Parse("2006-01-02", result.Date); err == nil {
-		date = parsed.Format("02/01")
+		names = append(names, "🎂 "+person.Name)
 	}
 
 	return fmt.Sprintf(
-		"✨ Hoje o nosso time tem um motivo especial para celebrar!\n\nHoje comemoramos o aniversário de:\n%s\n\nEntre projetos, ideias e desafios, são as pessoas que fazem tudo acontecer. Que este novo ciclo venha cheio de boas conquistas, aprendizados e momentos felizes! 🚀\n\nPessoal, vamos deixar uma mensagem de carinho e tornar este dia ainda mais especial? 💙\n\nE já fica o aviso: queremos churrasco, hein?! 🔥🥩\n\n📅 %s",
+		"Hoje o nosso time tem um motivo especial para celebrar!\n\nHoje comemoramos o aniversário de:\n\n%s\n\nEntre projetos, ideias e desafios, são as pessoas que fazem tudo acontecer. Que este novo ciclo venha cheio de boas conquistas, aprendizados e momentos felizes! 🚀\n\nPessoal, vamos deixar uma mensagem de carinho e tornar este dia ainda mais especial? 💙\n\nE já fica o aviso: queremos churrasco, hein?! 🔥🥩",
 		strings.Join(names, "\n"),
-		date,
 	)
 }
 
