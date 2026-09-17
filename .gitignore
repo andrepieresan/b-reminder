@@ -6,6 +6,10 @@
 *service-account*.json
 credentials*.json
 kubeconfig*
+*.pem
+*.key
+*.p12
+*.pfx
 
 # Build and runtime artifacts
 /birth-reminder

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"strings"
@@ -77,9 +78,8 @@ func loadWhatsApp() (WhatsAppConfig, error) {
 	if err != nil {
 		return WhatsAppConfig{}, err
 	}
-	parsedURL, err := url.Parse(webhookURL)
-	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") || parsedURL.Host == "" {
-		return WhatsAppConfig{}, fmt.Errorf("WHATSAPP_WEBHOOK_URL deve ser uma URL HTTP ou HTTPS valida")
+	if err := validateWebhookURL(webhookURL); err != nil {
+		return WhatsAppConfig{}, err
 	}
 	recipient, err := required("WHATSAPP_RECIPIENT")
 	if err != nil {
@@ -91,6 +91,28 @@ func loadWhatsApp() (WhatsAppConfig, error) {
 		Recipient:  recipient,
 		SentBy:     valueOrDefault("WHATSAPP_SENT_BY", "birth-reminder"),
 	}, nil
+}
+
+func validateWebhookURL(value string) error {
+	parsedURL, err := url.ParseRequestURI(value)
+	if err != nil || parsedURL.Host == "" {
+		return fmt.Errorf("WHATSAPP_WEBHOOK_URL deve ser uma URL HTTPS valida")
+	}
+	if parsedURL.Scheme == "https" {
+		return nil
+	}
+	if parsedURL.Scheme == "http" && isLoopbackHost(parsedURL.Hostname()) {
+		return nil
+	}
+	return fmt.Errorf("WHATSAPP_WEBHOOK_URL deve usar HTTPS; HTTP e permitido apenas para localhost")
+}
+
+func isLoopbackHost(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 func required(name string) (string, error) {

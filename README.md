@@ -60,13 +60,19 @@ O webhook deve aceitar um `POST` JSON neste formato:
 }
 ```
 
+Em producao, `WHATSAPP_WEBHOOK_URL` deve usar HTTPS. Enderecos HTTP sao aceitos
+somente em interfaces de loopback (`localhost`, `127.0.0.1` e `::1`) para testes.
+
 ## Executar
 
-Requer Go 1.25 ou superior:
+Requer Go 1.26 ou superior:
 
 ```sh
 ./run-local.sh
 ```
+
+O script interpreta `.env` apenas como pares simples `CHAVE=VALOR`; comandos e
+expressoes shell nao sao executados.
 
 Ou compile um binario:
 

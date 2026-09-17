@@ -22,7 +22,12 @@ type Client struct {
 func New(cfg config.WhatsAppConfig) *Client {
 	return &Client{
 		config: cfg,
-		http:   &http.Client{Timeout: 15 * time.Second},
+		http: &http.Client{
+			Timeout: 15 * time.Second,
+			CheckRedirect: func(*http.Request, []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
 	}
 }
 

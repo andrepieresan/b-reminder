@@ -80,10 +80,15 @@ func run(ctx context.Context) error {
 
 	client := whatsapp.New(cfg.WhatsApp)
 	for _, alert := range alerts {
+		names := make([]string, 0, len(alert.result.People))
+		for _, person := range alert.result.People {
+			names = append(names, person.Name)
+		}
+
 		logger.LogAttrs(ctx, slog.LevelInfo, "[SYNC] Aniversario encontrado "+alert.when,
 			slog.String("date", alert.result.Date),
 			slog.Int("count", len(alert.result.People)),
-			slog.Any("people", alert.result.People),
+			slog.Any("names", names),
 		)
 
 		if err := client.Send(ctx, alert.message); err != nil {

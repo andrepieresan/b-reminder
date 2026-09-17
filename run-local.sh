@@ -6,8 +6,15 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-set -a
-. ./.env
-set +a
+while IFS='=' read -r key value || [ -n "$key" ]; do
+  case "$key" in
+    ''|'#'*) continue ;;
+    [0-9]*|*[!A-Za-z0-9_]*)
+      echo "Chave invalida no arquivo .env: $key" >&2
+      exit 1
+      ;;
+  esac
+  export "$key=$value"
+done < .env
 
 exec go run ./cmd/birthday-reminder
