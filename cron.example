@@ -1,0 +1,11 @@
+CRON_TZ=America/Sao_Paulo
+GOOGLE_SHEET_ID=your-google-sheet-id
+GOOGLE_SHEET_RANGE=Funcionarios!A:C
+GOOGLE_APPLICATION_CREDENTIALS=/etc/birth-reminder/google-service-account.json
+TIMEZONE=America/Sao_Paulo
+LOG_FORMAT=json
+WHATSAPP_WEBHOOK_URL=https://your-whatsapp-provider.example/send-message
+WHATSAPP_RECIPIENT=your-recipient-id
+WHATSAPP_SENT_BY=birth-reminder
+
+45 8 * * * /opt/birth-reminder/birthday-reminder >> /var/log/birth-reminder.log 2>&1

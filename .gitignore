@@ -1,0 +1,19 @@
+.env
+.env.*
+!.env.example
+
+# Google and Kubernetes credentials
+*service-account*.json
+credentials*.json
+kubeconfig*
+
+# Build and runtime artifacts
+/birth-reminder
+/birthday-reminder
+*.log
+coverage.out
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
